@@ -168,6 +168,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#e5e7eb'
     }
-})
+});
 
 export default Home;
