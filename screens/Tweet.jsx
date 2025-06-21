@@ -3,11 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react
 import Entypo from '@expo/vector-icons/Entypo';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 
-function Tweet() {
+function Tweet({ navigation }) {
+    function goToProfile() {
+        navigation.navigate('Profile');
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.profileContainer}>
-                <TouchableOpacity style={styles.flexRow}>
+                <TouchableOpacity style={styles.flexRow}
+                    onPress={() => goToProfile()}>
                     <Image style={styles.avatar} source={{
                         uri: 'https://reactnative.dev/img/tiny_logo.png'
                     }} />

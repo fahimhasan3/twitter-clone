@@ -88,7 +88,7 @@ function Profile() {
                     <EvilIcons name="link" size={24} color="gray" />
                     <Text style={styles.linkColor}>Laracast.com</Text>
                 </TouchableOpacity>
-                <View style={[styles.linkItem, { marginLeft: 4 }]}>
+                <View style={[styles.linkItem, { marginLeft: 16 }]}>
                     <EvilIcons name="calendar" size={24} color="gray" />
                     <Text style={styles.textColor}>Joined May 2023</Text>
                 </View>
@@ -98,7 +98,7 @@ function Profile() {
                     <Text style={styles.followItemNumber}>509</Text>
                     <Text style={styles.followItemLabel}>Following</Text>
                 </View>
-                <View style={[styles.followItem, { marginLeft: 4 }]}>
+                <View style={[styles.followItem, { marginLeft: 16 }]}>
                     <Text style={styles.followItemNumber}>2,354</Text>
                     <Text style={styles.followItemLabel}>Followers</Text>
                 </View>
