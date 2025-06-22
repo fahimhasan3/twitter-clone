@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, StyleSheet, FlatList, Image, TouchableOpacity, Platform } from 'react-native';
+import {
+    View, Text, Button, StyleSheet, FlatList, Image,
+    TouchableOpacity, Platform, ActivityIndicator
+} from 'react-native';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import axios from 'axios';
@@ -9,19 +12,30 @@ import formatDistance from '../helpers/formatDistanceCustom';
 
 function Home({ navigation }) {
     const [tweets, setTweets] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
         getAllTweets();
     }, []);
 
     function getAllTweets() {
-        axios.get('https://cb35-2a0a-ef40-b9e-1701-289f-5dd6-f306-440e.ngrok-free.app/api/tweets')
+        axios.get('https://a063-2a0a-ef40-b9e-1701-289f-5dd6-f306-440e.ngrok-free.app/api/tweets')
             .then(function (response) {
                 setTweets(response.data);
             })
             .catch(function (error) {
                 console.log(error);
+            })
+            .finally(function () {
+                setIsLoading(false);
+                setIsRefreshing(false);
             });
+    }
+
+    function handleRefresh() {
+        setIsRefreshing(true);
+        getAllTweets();
     }
 
     function goToProfile() {
@@ -93,12 +107,18 @@ function Home({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <FlatList
-                data={tweets}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                ItemSeparatorComponent={() => <View style={styles.tweetSeparator} />}
-            />
+            {isLoading ? (
+                <ActivityIndicator style={{ marginTop: 8 }} size='large' />
+            ) : (
+                <FlatList
+                    data={tweets}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id.toString()}
+                    ItemSeparatorComponent={() => <View style={styles.tweetSeparator} />}
+                    refreshing={isRefreshing}
+                    onRefresh={handleRefresh}
+                />
+            )}
             <TouchableOpacity style={styles.floatingButton}
                 onPress={() => goToNewTweet()}>
                 <AntDesign name="plus" size={26} color="white" />
