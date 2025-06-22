@@ -1,35 +1,28 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button, StyleSheet, FlatList, Image, TouchableOpacity, Platform } from 'react-native';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import axios from 'axios';
+import { formatDistanceToNowStrict } from 'date-fns';
+import locale from 'date-fns/locale/en-US'
+import formatDistance from '../helpers/formatDistanceCustom';
 
 function Home({ navigation }) {
-    const DATA = [
-        {
-            id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-            title: 'First Item',
-        },
-        {
-            id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-            title: 'Second Item',
-        },
-        {
-            id: '58694a0f-3da1-471f-bd96-145571e29d72',
-            title: 'Third Item',
-        },
-        {
-            id: '4',
-            title: 'Fourth Item',
-        },
-        {
-            id: '5',
-            title: 'Sixth Item',
-        },
-        {
-            id: '6',
-            title: 'Seventh Item',
-        },
-    ];
+    const [tweets, setTweets] = useState([]);
+
+    useEffect(() => {
+        getAllTweets();
+    }, []);
+
+    function getAllTweets() {
+        axios.get('https://cb35-2a0a-ef40-b9e-1701-289f-5dd6-f306-440e.ngrok-free.app/api/tweets')
+            .then(function (response) {
+                setTweets(response.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 
     function goToProfile() {
         navigation.navigate('Profile');
@@ -44,27 +37,32 @@ function Home({ navigation }) {
     }
 
     const renderItem = ({ item }) => {
-        const { title } = item;
+        const { user, body, created_at } = item;
+
         return (
             <View style={styles.tweetContainer}>
                 <TouchableOpacity onPress={() => goToProfile()}>
                     <Image style={styles.avatar} source={{
-                        uri: 'https://reactnative.dev/img/tiny_logo.png'
+                        uri: user.avatar
                     }} />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
                     <TouchableOpacity style={styles.flexRow} onPress={() => goToTweet()}>
-                        <Text numberOfLines={1} style={styles.tweetName}>{title}</Text>
-                        <Text numberOfLines={1} style={styles.tweetHandle}>@fahimhasan</Text>
-                        <Text numberOfLines={1} style={styles.tweetHandle}>9m</Text>
+                        <Text numberOfLines={1} style={styles.tweetName}>{user.name}</Text>
+                        <Text numberOfLines={1} style={styles.tweetHandle}>@{user.username}</Text>
+                        <Text numberOfLines={1} style={styles.tweetHandle}>
+                            {formatDistanceToNowStrict(new Date(created_at), {
+                                locale: {
+                                    ...locale,
+                                    formatDistance,
+                                },
+                            })}
+                        </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.tweetContentContainer}
                         onPress={() => goToTweet()}>
                         <Text style={styles.tweetContent}>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                            Soluta magnam quibusdam eaque repudiandae quasi dignissimos
-                            optio praesentium dolores, error quos deleniti similique
-                            cupiditate id cum. Veritatis error id et nisi.
+                            {body}
                         </Text>
                     </TouchableOpacity>
                     <View style={styles.tweetEngagement}>
@@ -96,7 +94,7 @@ function Home({ navigation }) {
     return (
         <View style={styles.container}>
             <FlatList
-                data={DATA}
+                data={tweets}
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 ItemSeparatorComponent={() => <View style={styles.tweetSeparator} />}
