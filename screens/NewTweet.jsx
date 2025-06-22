@@ -1,12 +1,36 @@
-import * as React from 'react';
-import { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import {
+    View, Text, StyleSheet, TouchableOpacity, Image, TextInput, ActivityIndicator,
+    Alert
+} from 'react-native';
+import axiosConfig from '../helpers/axiosConfig';
 
 function NewTweet({ navigation }) {
     const [tweet, setTweet] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     function sendTweet() {
-        navigation.navigate('Tab');
+        if (tweet.length === 0) {
+            Alert.alert('Please enter a tweet')
+            return;
+        }
+
+        setIsLoading(true);
+        axiosConfig
+            .post(`/tweets`, {
+                body: tweet
+            })
+            .then(function (response) {
+                navigation.navigate('Tab', {
+                    screen: 'Home1',
+                    params: { newTweetAdded: response.data }
+                });
+            })
+            .catch(function (error) {
+                console.log(error);
+            }).finally(function () {
+                setIsLoading(false);
+            });
     }
 
     return (
@@ -15,12 +39,21 @@ function NewTweet({ navigation }) {
                 <Text style={tweet.length > 250 ? styles.textRed : styles.textGray}>
                     Characters left: {280 - tweet.length}
                 </Text>
-                <TouchableOpacity
-                    style={styles.TweetButton}
-                    onPress={() => sendTweet()}
-                >
-                    <Text style={styles.TweetButtonText}>Tweet</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    {isLoading && (
+                        <ActivityIndicator
+                            size='small'
+                            color='gray'
+                            style={{ marginRight: 8 }} />
+                    )}
+                    <TouchableOpacity
+                        disabled={isLoading}
+                        style={styles.TweetButton}
+                        onPress={() => sendTweet()}
+                    >
+                        <Text style={styles.TweetButtonText}>Tweet</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
             <View style={styles.tweetBoxContainer}>
                 <Image style={styles.avatar} source={{

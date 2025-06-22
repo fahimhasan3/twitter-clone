@@ -73,8 +73,8 @@ export default function App() {
   return (
     <NavigationContainer>
       <Drawer.Navigator initialRouteName='Home'>
-        <Stack.Screen name="Home" component={HomeStackNavigator} />
-        <Stack.Screen name="Settings" component={Settings} />
+        <Drawer.Screen name="Home" component={HomeStackNavigator} />
+        <Drawer.Screen name="Settings" component={Settings} />
       </Drawer.Navigator>
 
     </NavigationContainer>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View, Text, Button, StyleSheet, FlatList, Image,
     TouchableOpacity, Platform, ActivityIndicator
@@ -11,16 +11,27 @@ import locale from 'date-fns/locale/en-US'
 import formatDistance from '../helpers/formatDistanceCustom';
 import axiosConfig from '../helpers/axiosConfig';
 
-function Home({ navigation }) {
+function Home({ route, navigation }) {
     const [tweets, setTweets] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [page, setPage] = useState(1);
     const [isAtEndOfScrolling, setIsAtEndOfScrolling] = useState(false);
+    const [isFlatListReady, setIsFlatListReady] = useState(false);
+    const flatListRef = useRef();
 
     useEffect(() => {
         getAllTweets();
     }, [page]);
+
+    useEffect(() => {
+        if (route?.params?.newTweetAdded && isFlatListReady) {
+            getAllTweetsRefresh();
+            flatListRef.current.scrollToOffset({
+                offset: 0
+            });
+        }
+    }, [route?.params?.newTweetAdded, isFlatListReady]);
 
     function getAllTweets() {
         axiosConfig
@@ -42,6 +53,24 @@ function Home({ navigation }) {
             .finally(function () {
                 setIsLoading(false);
                 setIsRefreshing(false);
+            });
+    }
+
+    function getAllTweetsRefresh() {
+        setPage(1);
+
+        axiosConfig
+            .get(`/tweets`)
+            .then(function (response) {
+                setTweets(response.data.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+            .finally(function () {
+                setIsLoading(false);
+                setIsRefreshing(false);
+                setIsAtEndOfScrolling(false);
             });
     }
 
@@ -131,6 +160,8 @@ function Home({ navigation }) {
                 <ActivityIndicator style={{ marginTop: 20 }} size='large' color='gray' />
             ) : (
                 <FlatList
+                    ref={flatListRef}
+                    onLayout={() => setIsFlatListReady(true)}
                     data={tweets}
                     renderItem={renderItem}
                     keyExtractor={item => item.id.toString()}
