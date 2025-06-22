@@ -5,10 +5,11 @@ import {
 } from 'react-native';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import axios from 'axios';
 import { formatDistanceToNowStrict } from 'date-fns';
 import locale from 'date-fns/locale/en-US'
+
 import formatDistance from '../helpers/formatDistanceCustom';
+import axiosConfig from '../helpers/axiosConfig';
 
 function Home({ navigation }) {
     const [tweets, setTweets] = useState([]);
@@ -22,7 +23,8 @@ function Home({ navigation }) {
     }, [page]);
 
     function getAllTweets() {
-        axios.get(`https://a063-2a0a-ef40-b9e-1701-289f-5dd6-f306-440e.ngrok-free.app/api/tweets?page=${page}`)
+        axiosConfig
+            .get(`/tweets?page=${page}`)
             .then(function (response) {
                 if (page > 1) {
                     setTweets([...tweets, ...response.data.data]);
@@ -58,8 +60,10 @@ function Home({ navigation }) {
         navigation.navigate('Profile');
     }
 
-    function goToTweet() {
-        navigation.navigate('Tweet');
+    function goToTweet(tweetId) {
+        navigation.navigate('Tweet', {
+            tweetId: tweetId
+        });
     }
 
     function goToNewTweet() {
@@ -77,7 +81,7 @@ function Home({ navigation }) {
                     }} />
                 </TouchableOpacity>
                 <View style={{ flex: 1 }}>
-                    <TouchableOpacity style={styles.flexRow} onPress={() => goToTweet()}>
+                    <TouchableOpacity style={styles.flexRow} onPress={() => goToTweet(item.id)}>
                         <Text numberOfLines={1} style={styles.tweetName}>{user.name}</Text>
                         <Text numberOfLines={1} style={styles.tweetHandle}>@{user.username}</Text>
                         <Text numberOfLines={1} style={styles.tweetHandle}>
@@ -90,7 +94,7 @@ function Home({ navigation }) {
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.tweetContentContainer}
-                        onPress={() => goToTweet()}>
+                        onPress={() => goToTweet(item.id)}>
                         <Text style={styles.tweetContent}>
                             {body}
                         </Text>
