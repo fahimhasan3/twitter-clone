@@ -1,56 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Linking, FlatList, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+    View, Text, StyleSheet, Image, TouchableOpacity,
+    Linking, FlatList, ActivityIndicator
+} from 'react-native';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
-import { Platform } from 'react-native';
-import axiosConfig from '../helpers/axiosConfig';
 import { format } from 'date-fns';
 
-const DATA = [
-    {
-        id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-        title: 'First Item',
-    },
-    {
-        id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-        title: 'Second Item',
-    },
-    {
-        id: '58694a0f-3da1-471f-bd96-145571e29d72',
-        title: 'Third Item',
-    },
-    {
-        id: '4',
-        title: 'Fourth Item',
-    },
-    {
-        id: '5',
-        title: 'Sixth Item',
-    },
-    {
-        id: '6',
-        title: 'Seventh Item',
-    },
-    {
-        id: '7',
-        title: 'Fourth Item',
-    },
-    {
-        id: '8',
-        title: 'Sixth Item',
-    },
-    {
-        id: '9',
-        title: 'Seventh Item',
-    },
-];
+import axiosConfig from '../helpers/axiosConfig';
+import RenderItem from '../components/RenderItem';
 
 function Profile({ route, navigation }) {
     const [user, setUser] = useState();
-    const [isLoading, setIsLoading] = useState(true);
+    const [userTweets, setUserTweets] = useState();
 
-    React.useEffect(() => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingTweets, setIsLoadingTweets] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [page, setPage] = useState(1);
+    const [isAtEndOfScrolling, setIsAtEndOfScrolling] = useState(false);
+    const flatListRef = useRef();
+
+    useEffect(() => {
         getUserProfile();
-    }, []);
+        getUserTweets();
+    }, [page]);
 
     function getUserProfile() {
         axiosConfig
@@ -66,13 +39,38 @@ function Profile({ route, navigation }) {
             });
     }
 
-    const renderItem = ({ item }) => {
-        const { title } = item;
-        return (
-            <View style={{ marginVertical: 20 }}>
-                <Text>{title}</Text>
-            </View>
-        );
+    function getUserTweets() {
+        axiosConfig
+            .get(`/users/${route.params.user_id}/tweets?page=${page}`)
+            .then(function (response) {
+                if (page > 1) {
+                    setUserTweets([...userTweets, ...response.data.data]);
+                } else {
+                    setUserTweets(response.data.data);
+                }
+
+                if (!response.data.next_page_url) {
+                    setIsAtEndOfScrolling(true);
+                }
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+            .finally(function () {
+                setIsLoadingTweets(false);
+                setIsRefreshing(false);
+            });
+    }
+
+    function handleRefresh() {
+        setPage(1);
+        setIsAtEndOfScrolling(false);
+        setIsRefreshing(true);
+        getUserTweets();
+    }
+
+    function handleEnd() {
+        setPage(page + 1);
     }
 
     const ProfileHeader = () => (
@@ -138,14 +136,22 @@ function Profile({ route, navigation }) {
     );
 
     return (
-        <FlatList
-            style={styles.container}
-            data={DATA}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            ListHeaderComponent={ProfileHeader}
-        />
+        <View style={styles.container}>
+            <FlatList
+                ref={flatListRef}
+                data={userTweets}
+                renderItem={props => <RenderItem {...props} />}
+                keyExtractor={item => item.id.toString()}
+                ItemSeparatorComponent={() => <View style={styles.separator} />}
+                ListHeaderComponent={ProfileHeader}
+                refreshing={isRefreshing}
+                onRefresh={handleRefresh}
+                onEndReached={handleEnd}
+                onEndReachedThreshold={0}
+                ListFooterComponent={() => !isAtEndOfScrolling && (<ActivityIndicator size='large' color='gray' />)}
+                scrollIndicatorInsets={{ right: 1 }}
+            />
+        </View>
     );
 }
 
