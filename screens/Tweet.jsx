@@ -10,8 +10,10 @@ function Tweet({ route, navigation }) {
     const [tweet, setTweet] = useState();
     const [isLoading, setIsLoading] = useState(true);
 
-    function goToProfile() {
-        navigation.navigate('Profile');
+    function goToProfile(userId) {
+        navigation.navigate('Profile', {
+            user_id: userId
+        });
     }
 
     useEffect(() => {
@@ -38,7 +40,7 @@ function Tweet({ route, navigation }) {
                 <>
                     <View style={styles.profileContainer}>
                         <TouchableOpacity style={styles.flexRow}
-                            onPress={() => goToProfile()}>
+                            onPress={() => goToProfile(tweet.user.id)}>
                             <Image style={styles.avatar} source={{
                                 uri: tweet.user.avatar
                             }} />

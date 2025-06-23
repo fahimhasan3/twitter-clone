@@ -85,8 +85,10 @@ function Home({ route, navigation }) {
         setPage(page + 1);
     }
 
-    function goToProfile() {
-        navigation.navigate('Profile');
+    function goToProfile(userId) {
+        navigation.navigate('Profile', {
+            user_id: userId
+        });
     }
 
     function goToTweet(tweetId) {
@@ -104,7 +106,7 @@ function Home({ route, navigation }) {
 
         return (
             <View style={styles.tweetContainer}>
-                <TouchableOpacity onPress={() => goToProfile()}>
+                <TouchableOpacity onPress={() => goToProfile(user.id)}>
                     <Image style={styles.avatar} source={{
                         uri: user.avatar
                     }} />

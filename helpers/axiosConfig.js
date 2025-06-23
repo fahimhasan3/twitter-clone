@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosConfig = axios.create({
-    baseURL: 'https://a063-2a0a-ef40-b9e-1701-289f-5dd6-f306-440e.ngrok-free.app/api'
+    baseURL: 'https://e518-2a0a-ef40-190f-d801-e0fa-7e33-b6fb-e4de.ngrok-free.app/api'
 });
 
 export default axiosConfig;
