@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as SecureStore from 'expo-secure-store';
 
 import Home from './screens/Home';
 import NewTweet from './screens/NewTweet';
@@ -96,11 +97,16 @@ export default function Root() {
     const { user, setUser } = useContext(AuthContext);
 
     useEffect(() => {
-        // check if user is logged in or not
-        // check secure store for token
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 2000);
+        SecureStore.getItemAsync('user')
+            .then(userString => {
+                if (userString) {
+                    setUser(JSON.parse(userString));
+                }
+            }).catch(error => {
+                console.log(error);
+            }).finally(() => {
+                setIsLoading(false);
+            })
     }, []);
 
     if (isLoading) {
