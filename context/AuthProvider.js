@@ -38,8 +38,8 @@ export const AuthProvider = ({ children }) => {
                             setError(null);
                             SecureStore.setItemAsync('user', JSON.stringify(newUser));
                         }).catch(error => {
-                            setError(error.response.data.message);
-                            console.log('error catched ', error.response.data.message);
+                            const key = Object.keys(error.response.data.errors)[0];
+                            setError(error.response.data.errors[key][0]);
                         }).finally(() => {
                             setIsLoading(false);
                         });
